@@ -1,45 +1,10 @@
 <?php
 
-$id = $_GET['id'];
-// echo $id;
+// ①require_onceを使ってみよう！
+require_once('dbc.php');
 
-if(empty($id)) {
-    exit('IDが不正です');
-}
-
-function dbConnect() {
-    $dsn = 'mysql:host=localhost;dbname=blog_app;charset=utf8';
-    $user = 'root';
-    $pass = 'root';
-
-    try {
-        $dbh = new PDO($dsn,$user,$pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
-    } catch(PDOException $e) {
-        echo '接続失敗'. $e->getMessage();
-        exit();
-    };
-
-    return $dbh;
-}
-$dbh = dbConnect();
-    // ①SQLの準備
-    $stmt = $dbh->prepare('SELECT * FROM blog Where id = :id');
-    $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
-    // ②SQLの実行
-    $stmt->execute();
-    // ③SQLの結果を取得
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    // var_dump($result);
-
-    if(!$result) {
-        exit('ブログがありません。');
-    }
+$result = Blog\Dbc\getBlog($_GET['id']);
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -52,7 +17,7 @@ $dbh = dbConnect();
     <h2>ブログ詳細</h2>
     <h3>タイトル：<?php echo $result['title']; ?></h3>
     <h3>投稿日時<?php echo $result['post_at']; ?></h3>
-    <h3>カテゴリ：<?php echo $result['category']; ?></h3>
+    <h3>カテゴリ：<?php echo Blog\Dbc\setCategoryName($result['category']); ?></h3>
     <hr>
     <p>本文：<?php echo $result['content']; ?></p>
 </body>
